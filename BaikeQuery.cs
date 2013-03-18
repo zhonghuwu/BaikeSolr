@@ -22,10 +22,11 @@ namespace BaikeSolr
         //定义类的成员变量：IP；
 
         BaikeQparameter bqparameter;
-        string QueryPrefix = "";//获取用户输入的查询字符，用于自动补全。2012-03-18 用于提示词
+        string QueryPrefix = "";//获取用户输入的查询字符，用于自动补全。
         public List<string> Resultlist=new List<string>();//记录查询结果的词条id列表
         public int QueryCount=0;//返回查询的结果总数。
-        public string Termid="";//用于获得相关词条2012-03-18 用于获得词条对应的相关词条
+        string Termid="";//用于获得词条对应的相关词条
+
         public int RelativeCount = 0;
 
         string IP="http://localhost:8080/";
@@ -42,13 +43,13 @@ namespace BaikeSolr
             string url = IP + "solr/select?q=" + bqparameter.querystr + "&start=" + bqparameter.start + "&fq=typeid:" + bqparameter.typeid;
             return url;
         }
-        //用于提示词的url,2012-03-18 用于提示词
+        //用于提示词的url,
         private string GetSuggestUrl() 
         {
             string url = IP + "solr/terms?terms.fl=terminfo&terms.limit=10&terms.sort=index&terms.prefix=" +QueryPrefix;
             return url;
         }
-        //用于获取一个词条的相关词条,2012-03-18 用于相关词条
+        //用于获取一个词条的相关词条,
         private string GetRelativeUrl()
         {
             string url = IP + "solr/select?q=id:"+Termid+"&mlt=true&mlt.fl=terminfo&mlt.count=6";
@@ -90,7 +91,7 @@ namespace BaikeSolr
 
         }
 
-        //分析自动补全返回的xml文件   2012-03-18 用于提示词
+        //分析自动补全返回的xml文件  
         private void AnalysisXmlSuggest(XmlDocument doc)
         {
             XmlNode termsnode = doc.SelectSingleNode("/response/lst[@name='terms']");
@@ -104,7 +105,7 @@ namespace BaikeSolr
            
         }
 
-        //分析相关词条返回的xml文件   2012-03-18 用于相关词条
+        //分析相关词条返回的xml文件   
         private void AnaylysisXmlRelative(XmlDocument doc)
         {
             //获取返回的termid
@@ -145,7 +146,7 @@ namespace BaikeSolr
             AnalysisXmlResult(doc);
         }
 
-        //2012-03-18 用于提示词
+        //用于提示词
         public void ExcuteSuggest(string queryprefix)
         {
             QueryPrefix = queryprefix;
@@ -155,12 +156,12 @@ namespace BaikeSolr
 
 
         }
-        //2013-03-18用于相关查询词
+        //用于相关查询词
       //  public void ExcuteRelativeQuery()
        // {
 
        // }
-        //2013-03-18用于相关词条
+        //用于相关词条
         public void ExcuteRelativeTerms(string termid)
         {
             Termid = termid;
