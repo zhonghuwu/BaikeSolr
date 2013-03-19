@@ -30,7 +30,7 @@ namespace BaikeSolr
 
             //相关视频
             Console.WriteLine("获取词条的相关词条");
-            bquery.ExcuteRelativeTerms("761");
+            bquery.ExcuteRelativeTerms("761","5");
            
             Console.ReadLine();
         }

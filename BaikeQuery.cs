@@ -26,6 +26,7 @@ namespace BaikeSolr
         public List<string> Resultlist=new List<string>();//记录查询结果的词条id列表
         public int QueryCount=0;//返回查询的结果总数。
         string Termid="";//用于获得词条对应的相关词条
+        string Typeid="";//用于获得词条对应的相关词条
 
         public int RelativeCount = 0;
 
@@ -49,10 +50,11 @@ namespace BaikeSolr
             string url = IP + "solr/terms?terms.fl=terminfo&terms.limit=10&terms.sort=index&terms.prefix=" +QueryPrefix;
             return url;
         }
-        //用于获取一个词条的相关词条,
+     
+        //用于获取一个词条的相关词条 
         private string GetRelativeUrl()
         {
-            string url = IP + "solr/select?q=id:"+Termid+"&mlt=true&mlt.fl=terminfo&mlt.count=6";
+            string url = IP + "solr/mlt?q=id:" + Termid + "&mlt.fl=terminfo&rows=6&fl=id&fq=typeid:"+Typeid;
             return url;
         }
 
@@ -90,7 +92,6 @@ namespace BaikeSolr
 
 
         }
-
         //分析自动补全返回的xml文件  
         private void AnalysisXmlSuggest(XmlDocument doc)
         {
@@ -105,26 +106,23 @@ namespace BaikeSolr
            
         }
 
-        //分析相关词条返回的xml文件   
+        //分析相关词条返回的xml文件，
         private void AnaylysisXmlRelative(XmlDocument doc)
         {
-            //获取返回的termid
-            XmlNode mltnode = doc.SelectSingleNode("/response/lst[@name='moreLikeThis']");
-            XmlNodeList nodelist = mltnode.SelectNodes("./result/doc");
+            XmlNode tempnode = doc.SelectSingleNode("/response/result[@name='response']");
+            XmlNodeList nodelist = tempnode.SelectNodes("./doc");
             foreach (XmlNode node in nodelist)
             {
-                string temptermid = node.InnerText;
-                Resultlist.Add(temptermid);
-                //Console.WriteLine(node.InnerText);
+                string termid = node.InnerText;
+                Resultlist.Add(termid);
+             //  Console.WriteLine(termid);
             }
 
-            //获取返回的总的个数，如果为0，就从数据库中读取相关的词条
-            XmlNode tempnode = mltnode.SelectSingleNode("./result");
-            string count = tempnode.Attributes[1].Value;
-            RelativeCount =Convert.ToInt32(count);
-           // Console.WriteLine("返回个数:" + RelativeCount);
+            //提取总的个数
+            string tempcount = tempnode.Attributes[1].Value;
+            RelativeCount = Convert.ToInt32(tempcount);
+          // Console.WriteLine(RelativeCount);
         }
-
 
 
         public void ExcuteQuery(string querystr,int start)//用于一般的查询
@@ -145,7 +143,6 @@ namespace BaikeSolr
             XmlDocument doc = DownloadXmlResult(qurl);
             AnalysisXmlResult(doc);
         }
-
         //用于提示词
         public void ExcuteSuggest(string queryprefix)
         {
@@ -156,20 +153,23 @@ namespace BaikeSolr
 
 
         }
-        //用于相关查询词
-      //  public void ExcuteRelativeQuery()
-       // {
-
-       // }
-        //用于相关词条
-        public void ExcuteRelativeTerms(string termid)
+       
+         //用于相关词条
+        public void ExcuteRelativeTerms(string termid,string typeid)
         {
             Termid = termid;
-            string rurl = GetRelativeUrl();
-            XmlDocument doc = DownloadXmlResult(rurl);
+            Typeid = typeid;
+            string mrurl = GetRelativeUrl();
+            XmlDocument doc = DownloadXmlResult(mrurl);
             AnaylysisXmlRelative(doc);
+            
         }
 
+        //用于相关查询词
+        //  public void ExcuteRelativeQuery()
+        // {
+
+        // }
 
         
     }
